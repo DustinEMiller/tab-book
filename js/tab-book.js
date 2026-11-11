@@ -34,8 +34,6 @@
   };
 
   // ---- The words: syllables put back together into words and lines ----
-  // The tab shows the words under it, as in the app; kept between visits.
-  let showLyrics = store.get('lyrics') === 'on';
   // [{ t, text, first }] in the order sung: a word is its syllables run together, first is the first word of a line.
   function wordsOf(s) {
     const out = [];
@@ -174,9 +172,6 @@
     const bars = song.bars.length;
     $('meta').textContent = [song.artist, song.part, song.tuning, song.bpm ? `${song.bpm} bpm` : '', `${bars} bars`].filter(Boolean).join(' · ');
     $('play').disabled = false;
-    // The words under the tab, for a song that has words.
-    $('lyricsBtn').hidden = !hasLyrics(song);
-    $('lyricsBtn').setAttribute('aria-pressed', String(showLyrics));
     layout();
     $('sheet').scrollTop = 0;
     tick(true);
@@ -194,7 +189,8 @@
     const width = sheet.clientWidth - 32;
     perRow = width >= 900 ? 4 : width >= 560 ? 3 : 2;
     const strings = song.strings.length;
-    const words = showLyrics && hasLyrics(song) ? wordsOf(song) : [];
+    // The words always show under the tab, for a song that has them.
+    const words = hasLyrics(song) ? wordsOf(song) : [];
     const gap = 14, top = 26, left = 22, height = top + (strings - 1) * gap + 22 + (words.length ? 36 : 0);
     // Notes by bar, chords kept together.
     const byBar = song.bars.map(() => []);
@@ -376,14 +372,6 @@
   }
   document.querySelectorAll('.views button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
 
-  $('lyricsBtn').addEventListener('click', () => {
-    showLyrics = !showLyrics;
-    store.set('lyrics', showLyrics ? 'on' : 'off');
-    $('lyricsBtn').setAttribute('aria-pressed', String(showLyrics));
-    layout();
-    tick(true);
-  });
-
   // ---- Printing the words: in the bars they fall in, or line by line ----
   const make = (tag, cls, text) => {
     const e = document.createElement(tag);
@@ -480,7 +468,7 @@
     }
     const tools = make('div', 'ltools');
     if (sheetHasChords()) {
-      const c = make('button', 'ghost', 'Lyric + Chord Chart');
+      const c = make('button', 'ghost', 'Lyrics + Chords');
       c.setAttribute('aria-pressed', String(sheetChords));
       c.title = 'Write each chord over the word it changes on, as on a chord chart';
       c.addEventListener('click', () => { sheetChords = !sheetChords; store.set('sheetChords', sheetChords ? 'on' : 'off'); layout(); });

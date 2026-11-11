@@ -282,8 +282,7 @@ a:focus-visible {
 .controls.not-tab .play,
 .controls.not-tab #restart,
 .controls.not-tab .speed,
-.controls.not-tab .clock,
-.controls.not-tab #lyricsBtn {
+.controls.not-tab .clock {
   display: none;
 }
 
